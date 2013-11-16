@@ -110,7 +110,7 @@ public class QueryZookeeperStatsServlet extends AbstractHttpServlet {
                 sb.append("total_read_locks, total_failed_read_locks,")
                         .append("avg_acquire_read_lock_ms, avg_release_read_lock_ms")
                         .append("\n");
-                sb.append(read_lock).append(" ").append(failed_read_lock).append(" ");
+                sb.append("R: ").append(read_lock).append(" ").append(failed_read_lock).append(" ");
                 sb.append(total_acquire_read_time/read_lock).append(" ");
                 sb.append(total_release_read_time/read_lock).append("\n");
 
@@ -118,7 +118,7 @@ public class QueryZookeeperStatsServlet extends AbstractHttpServlet {
                 sb.append("total_write_locks, total_failed_write_locks,")
                         .append("avg_acquire_write_lock_ms, avg_release_write_lock_ms")
                         .append("\n");
-                sb.append(write_lock).append(" ").append(failed_write_lock).append(" ");
+                sb.append("W: ").append(write_lock).append(" ").append(failed_write_lock).append(" ");
                 sb.append(total_acquire_write_time/write_lock).append(" ");
                 sb.append(total_release_write_time/write_lock).append("\n");
 

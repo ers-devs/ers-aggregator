@@ -19,7 +19,7 @@
     <!-- see: ers-transactional-locking-zookeeper parameter -->
   	<context-param> 
  		<param-name>zookeeper-hosts</param-name>
-  		<param-value>134.21.73.204:2181,134.21.73.206:2181,134.21.73.208:2181</param-value>  -->
+  		<param-value>134.21.73.204:2182,134.21.73.206:2182,134.21.73.208:2182</param-value>  -->
 	</context-param>
 
 	<!-- NOTE: just one of the two following parameters can be set true !! not both in the same time -->
