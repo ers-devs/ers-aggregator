@@ -73,7 +73,7 @@
    <!-- if not set, default value is 0 -->
    <context-param> 
       <param-name>ers-transactional-locking-zookeeper</param-name>
-      <param-value>1</param-value>
+      <param-value>0</param-value>
    </context-param>
 
    <!-- set this to 1 if you want to use MVCC transactional support -->
