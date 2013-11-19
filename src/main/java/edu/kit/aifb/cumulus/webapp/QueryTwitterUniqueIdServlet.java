@@ -31,11 +31,15 @@ public class QueryTwitterUniqueIdServlet extends AbstractHttpServlet {
 		}
 		resp.setCharacterEncoding("UTF-8");
 
+                _log.info("TEST1");
+
 		String trials = req.getParameter("trials");
                 int no_trials = 10000;  // default value
 		if( trials != null && ! trials.isEmpty() ) {
                     no_trials = Integer.valueOf(trials);
                 }
+
+                _log.info("TEST2");
 
                 long start_time = System.currentTimeMillis();
                 for( int i=0; i<no_trials; ++i ) {
@@ -43,11 +47,16 @@ public class QueryTwitterUniqueIdServlet extends AbstractHttpServlet {
                 }
                 long total_time = System.currentTimeMillis()-start_time;
 
+                _log.info("TEST3");
+
 		String msg = "OK " + req.getRequestURI() + " " +
                         String.valueOf(HttpServletResponse.SC_OK) + "\n";
                 msg += " total time, no trials, time per trial \n";
                 msg += total_time + "," + no_trials + "," + ((total_time+0.0f)/no_trials);
                 resp.getWriter().println(msg);
+
+                _log.info("TEST4");
+
 		_log.info("[dataset] QUERY Twitter ID ");
 	}
 }
