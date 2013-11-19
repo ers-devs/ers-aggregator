@@ -192,6 +192,10 @@
 	<servlet-class>edu.kit.aifb.cumulus.webapp.QueryVersionsStatsServlet</servlet-class>
   </servlet>
   <servlet>
+	<servlet-name>query_unique_id</servlet-name>
+	<servlet-class>edu.kit.aifb.cumulus.webapp.QueryTwitterUniqueIdServlet</servlet-class>
+  </servlet>
+  <servlet>
 	<servlet-name>query_zookeeper</servlet-name>
 	<servlet-class>edu.kit.aifb.cumulus.webapp.QueryZookeeperStatsServlet</servlet-class>
   </servlet>
@@ -269,6 +273,10 @@
   <servlet-mapping>
     <servlet-name>query_all_graphs</servlet-name>
     <url-pattern>/query_all_graphs</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>query_unique_id</servlet-name>
+    <url-pattern>/query_unique_id</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>exist_graph</servlet-name>
