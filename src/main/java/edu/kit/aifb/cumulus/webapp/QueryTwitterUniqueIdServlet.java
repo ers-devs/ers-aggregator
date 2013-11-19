@@ -8,13 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.semanticweb.yars.nx.Node;
 
 import edu.kit.aifb.cumulus.webapp.formatter.SerializationFormat;
-import org.semanticweb.yars.nx.Variable;
-import org.semanticweb.yars.nx.parser.NxParser;
-import org.semanticweb.yars.nx.parser.ParseException;
-
 
 /**
  *
@@ -24,6 +19,7 @@ import org.semanticweb.yars.nx.parser.ParseException;
 public class QueryTwitterUniqueIdServlet extends AbstractHttpServlet {
 	private final Logger _log = Logger.getLogger(this.getClass().getName());
 
+        @Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		long start = System.currentTimeMillis();
 		ServletContext ctx = getServletContext();
@@ -33,7 +29,6 @@ public class QueryTwitterUniqueIdServlet extends AbstractHttpServlet {
 			sendError(ctx, req, resp, HttpServletResponse.SC_NOT_ACCEPTABLE, "no known mime type in Accept header");
 			return;
 		}
-		int queryLimit = (Integer)ctx.getAttribute(Listener.QUERY_LIMIT);
 		resp.setCharacterEncoding("UTF-8");
 
 		String trials = req.getParameter("trials");
@@ -51,15 +46,8 @@ public class QueryTwitterUniqueIdServlet extends AbstractHttpServlet {
 		String msg = "OK " + req.getRequestURI() + " " +
                         String.valueOf(HttpServletResponse.SC_OK) + "\n";
                 msg += " total time, no trials, time per trial \n";
-                msg += total_time + "," + no_trials + "," + (total_time/no_trials);
+                msg += total_time + "," + no_trials + "," + ((total_time+0.0f)/no_trials);
                 resp.getWriter().println(msg);
 		_log.info("[dataset] QUERY Twitter ID ");
-	}
-
-	private Node getNode(String value, String varName) throws ParseException {
-		if (value != null && value.trim().length() > 2)
-			return NxParser.parseNode(value);
-		else
-			return new Variable(varName);
 	}
 }
