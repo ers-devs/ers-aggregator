@@ -441,6 +441,10 @@ public abstract class AbstractCassandraRdfHector extends Store {
 		cfdef.setKeyValidationClass(keyComp.getClassName());
 		cfdef.setDefaultValidationClass(ComparatorType.UTF8TYPE.getClassName());
 
+                // NOTE: everything stays in memory ! 
+                cfdef.setKeyCacheSize(1);
+                cfdef.setRowCacheSize(1);
+
 		Map<String,String> compressionOptions = new HashMap<String, String>();
 		compressionOptions.put("sstable_compression", "SnappyCompressor");
 		cfdef.setCompressionOptions(compressionOptions);
