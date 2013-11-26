@@ -115,8 +115,11 @@ public class CreateServlet extends AbstractHttpServlet {
                     ret = crdf.addDataVersioning(e,p,v,Store.encodeKeyspace(a), 
                             0, urn);
                 }
-                else
+                else {
                     ret = crdf.addData(e,p,v,Store.encodeKeyspace(a), 0);
+                   // comment this in order to test just Tomcat performance !!!
+                   // ret = 0;
+                }
                 
 		if( ret  == -2 ) {
 			sendError(ctx, req, resp, HttpServletResponse.SC_CONFLICT, "Graph " + graph + " does not exist.");
