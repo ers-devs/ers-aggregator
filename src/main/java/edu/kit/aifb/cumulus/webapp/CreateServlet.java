@@ -113,7 +113,7 @@ public class CreateServlet extends AbstractHttpServlet {
                         return;
                     }
                     ret = crdf.addDataVersioning(e,p,v,Store.encodeKeyspace(a), 
-                            0, urn);
+                            0, urn, Listener.SNOWFLAKE_GENERATOR.getStringId());
                 }
                 else {
                     ret = crdf.addData(e,p,v,Store.encodeKeyspace(a), 0);
