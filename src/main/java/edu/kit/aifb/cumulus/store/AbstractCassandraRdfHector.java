@@ -445,10 +445,10 @@ public abstract class AbstractCassandraRdfHector extends Store {
 		cfdef.setDefaultValidationClass(ComparatorType.UTF8TYPE.getClassName());
 
                 // NOTE: everything stays in memory for intensive-accessible keyspaces
-                cfdef.setKeyCacheSize(1);
+                cfdef.setKeyCacheSize(1000000);
                 if( keyspaceName.equals(Listener.GRAPHS_NAMES_KEYSPACE) ||
                     keyspaceName.equals(Listener.GRAPHS_VERSIONS_KEYSPACE) )
-                    cfdef.setRowCacheSize(1);
+                    cfdef.setRowCacheSize(10000000);
 
 		Map<String,String> compressionOptions = new HashMap<String, String>();
 		compressionOptions.put("sstable_compression", "SnappyCompressor");
@@ -457,7 +457,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
 		if (cols != null)
 			for (String colName : cols)
 				cfdef.addColumnDefinition(createColDef(colName, ComparatorType.UTF8TYPE.getClassName(), indexedCols.contains(colName), "index_" + colName.substring(1)));
-
+    
 		return new ThriftCfDef(cfdef);
 	}
         
