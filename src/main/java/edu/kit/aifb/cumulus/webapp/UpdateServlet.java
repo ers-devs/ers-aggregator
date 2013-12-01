@@ -102,7 +102,7 @@ public class UpdateServlet extends AbstractHttpServlet {
 		resp.setContentType(formatter.getContentType());
 
                 int update_result=0;
-                 // is verioning enabled for this keyspace?
+                 // is versioning enabled for this keyspace?
                 if( crdf.keyspaceEnabledVersioning(a) ) {
                     if( urn == null || urn.isEmpty() ) {
                         sendResponse(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST,

@@ -227,7 +227,9 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
         @Override
 	protected int batchInsertVersioning(String cf, List<Node[]> li, String keyspace,
                 String URN_author, String txID) {
-                Hashtable<String, List<Node[]>> versioned_entities = new Hashtable<String, List<Node[]>>();
+
+                // comment this as a plain "insert" would not neeed to get the previous version, just to run an insert!
+                /*Hashtable<String, List<Node[]>> versioned_entities = new Hashtable<String, List<Node[]>>();
                 Hashtable<String, String> previous_commit_id  = new Hashtable<String, String>();
                 boolean successful_fetch = fetchMostRecentVersions(keyspace, cf, li, txID,
                         URN_author, versioned_entities, previous_commit_id);
@@ -236,14 +238,6 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                     // we have to abort here the insertion
                     return 2;
                 }
-
-                /*
-// SIMULATE SOME DELAY HERE !!
-try{
-Thread.sleep(System.currentTimeMillis()%10000);
-}catch(Exception ex) {}
-// END [THIS MUST BE ERASED IN PRODUCTION!!]*/
-
                 // add the new triples to previous versions
                 for(Iterator<Node[]> it_triples=li.iterator(); it_triples.hasNext(); ) {
                     Node[] triple = it_triples.next();
@@ -253,7 +247,6 @@ Thread.sleep(System.currentTimeMillis()%10000);
                     prev_version.add(triple);
                     versioned_entities.put(rowKey, prev_version);
                 }
-
                 //SPO
                 // insert 's-VER' and 's-URN' new versions
                 Mutator<String> m = HFactory.createMutator(getExistingKeyspace(keyspace), _ss);
@@ -271,8 +264,6 @@ Thread.sleep(System.currentTimeMillis()%10000);
                         if( !reordered[0].toString().contains("-VER") )
                             rowKey = new Resource(reordered[0].toString() + "-VER").toN3();
 
-                        /* this is the approach without using Snowflake
-                        int next_ver = old_version_num+1;*/
                         String next_ver;
                         // if txID is different than null, it means this is called in a transactional context
                         if( txID != null ) 
@@ -308,7 +299,38 @@ Thread.sleep(System.currentTimeMillis()%10000);
                 }
                 // now try to write all CID,prevCID; if check my writes is enabled, it can abort in case
                 //there are conflicts
-                return commitOrAbort(keyspace, txID, URN_author, versioned_entities, previous_commit_id);
+                return commitOrAbort(keyspace, txID, URN_author, versioned_entities, previous_commit_id); */
+
+                //SPO
+                // insert 's-VER' and 's-URN' new versions
+                Mutator<String> m = HFactory.createMutator(getExistingKeyspace(keyspace), _ss);
+                for( Iterator<Node[]> it = li.iterator(); it.hasNext(); ) {
+                    Node[] nx = (Node[]) it.next();
+                    // reorder for the key
+                    Node[] reordered = Util.reorder(nx, _maps.get(cf));
+                    String rowKey = new Resource(reordered[0].toString()).toN3();
+                    if( !reordered[0].toString().contains("-VER") )
+                        rowKey = new Resource(reordered[0].toString() + "-VER").toN3();
+
+                    String next_ver = txID;
+                    // VER, URN
+                    Composite colKey = new Composite();
+                    colKey.addComponent(next_ver, StringSerializer.get());
+                    colKey.addComponent(URN_author, StringSerializer.get());
+                    String colKey_s = Nodes.toN3(new Node[] { reordered[1], reordered[2] });
+                    colKey.addComponent(colKey_s, StringSerializer.get());
+                    HColumn<Composite, String> hColumnObj_itemID = HFactory.createColumn(colKey, "",
+                            new CompositeSerializer(),
+                            StringSerializer.get());
+                    m.addInsertion(rowKey, cf, hColumnObj_itemID);
+
+                    // now just add the commit ID into the versioning tree
+                    String version_key = rowKey.replaceAll("-VER", "");
+                    writeCommitID(keyspace, version_key.replaceAll("<", "").replaceAll(">", ""),
+                            URN_author, txID, "-");
+                }
+                m.execute();
+                return 0;
 	}
 
         @Override
@@ -324,21 +346,31 @@ Thread.sleep(System.currentTimeMillis()%10000);
                 return 2;
             }
 
-            // now update the properties into the recent versions fetched
+            // now update the properties into the recent version fetched
             for( Iterator<Node[]> it=li.iterator(); it.hasNext(); ) {
                 Node[] current = it.next();
                 String prop = current[1].toN3();
                 String value_old = current[2].toN3();
                 Node value_new = current[3];
 
+                boolean found = false;
                 List<Node[]> entity_version = versioned_entities.get("<"+current[0].toString()+"-VER>");
                 for( Iterator<Node[]> it_version=entity_version.iterator(); it_version.hasNext(); ) {
                     Node[] ver_ent = it_version.next();
                     String ver_prop = ver_ent[1].toN3();
                     String ver_value = ver_ent[2].toN3();
-                    // check if this is the triple to be replaces
-                    if( prop.equals(ver_prop) && value_old.equals(ver_value) )
+                    // check if this is the triple to be replaced
+                    if( prop.equals(ver_prop) && value_old.equals(ver_value) ) {
+                        found = true;
                         ver_ent[2] = value_new;
+                    }
+                }
+                if( ! found ) {
+                    //then just add the new triple. but with the new value
+                    current[2] = current[3];
+                    entity_version.add(current);
+                    versioned_entities.remove("<"+current[0].toString()+"-VER>");
+                    versioned_entities.put("<"+current[0].toString()+"-VER>",entity_version);
                 }
             }
 
@@ -379,6 +411,7 @@ Thread.sleep(System.currentTimeMillis()%10000);
                             StringSerializer.get());
                     m.addInsertion(rowKey, cf, hColumnObj_itemID);
 
+                    /*
                     // URN, VER
                     rowKey = new Resource(reordered[0].toString() + "-URN").toN3();
                     colKey = new Composite();
@@ -391,6 +424,7 @@ Thread.sleep(System.currentTimeMillis()%10000);
                             new CompositeSerializer(),
                             StringSerializer.get());
                     m.addInsertion(rowKey, cf, hColumnObj_itemID);
+                    */
                 }
                 m.execute();
             }
