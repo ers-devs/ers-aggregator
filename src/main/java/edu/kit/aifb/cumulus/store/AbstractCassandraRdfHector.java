@@ -582,7 +582,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 // performance counter
                 CassandraRdfHectorFlatHash.no_get_pending_tx++;
                 long now = System.currentTimeMillis();
-                HashSet<String> pending_txs = getCIDPendingTXSet(keyspaceName);
+                HashSet<String> pending_txs = getCIDPendingTXSet(keyspaceName, entity_w_brackets);
                 CassandraRdfHectorFlatHash.get_pending_tx+=(System.currentTimeMillis()-now);
 
                 // performance counter
@@ -827,11 +827,10 @@ public abstract class AbstractCassandraRdfHector extends Store {
         }
 
         @Override
-        public HashSet<String> getCIDPendingTXSet(String keyspace) {
+        public HashSet<String> getCIDPendingTXSet(String keyspace, String entity_w_brackets) {
             HashSet<String> results = new HashSet<String>();
             Node[] query = new Node[3];
-            String ent = query[0].toString();
-            String e = "<"+keyspace+ "-" + ent + "-pending-tx>";
+            String e = "<"+keyspace+ "-" + entity_w_brackets + "-pending-tx>";
             try {
                     query[0] = getNode(e, "s");
                     query[1] = getNode(null, "p");
