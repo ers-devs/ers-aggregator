@@ -415,7 +415,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
 		cfdef.setColumnType(ColumnType.STANDARD);
                 cfdef.setComparatorType(ComparatorType.COMPOSITETYPE);
                 cfdef.setComparatorTypeAlias("(UTF8Type,UTF8Type,UTF8Type)");
-               
+
                 // validator - you're simply asking Cassandra to make sure those bytes are encoded as you desire.
                 cfdef.setKeyValidationClass(ComparatorType.UTF8TYPE.getClassName());
                 //cfdef.setKeyValidationClass("CompositeType(UTF8Type,IntegerType,UTF8Type)");
@@ -445,10 +445,14 @@ public abstract class AbstractCassandraRdfHector extends Store {
 		cfdef.setDefaultValidationClass(ComparatorType.UTF8TYPE.getClassName());
 
                 // NOTE: everything stays in memory for intensive-accessible keyspaces
-                cfdef.setKeyCacheSize(1000000);
+                cfdef.setKeyCacheSize(1);
+                if( keyspaceName.equals(Listener.GRAPHS_VERSIONS_KEYSPACE) )
+                    cfdef.setGcGraceSeconds(10);
+
+                /*
                 if( keyspaceName.equals(Listener.GRAPHS_NAMES_KEYSPACE) ||
                     keyspaceName.equals(Listener.GRAPHS_VERSIONS_KEYSPACE) )
-                    cfdef.setRowCacheSize(10000000);
+                    cfdef.setRowCacheSize(10000000); */
 
 		Map<String,String> compressionOptions = new HashMap<String, String>();
 		compressionOptions.put("sstable_compression", "SnappyCompressor");
