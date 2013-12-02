@@ -112,13 +112,19 @@ public class ExecuteTransactions
             // get transaction ID from Snowflake here
             String txID = Listener.SNOWFLAKE_GENERATOR.getStringId();
 
+            ArrayList<String> touched_entities = new ArrayList<String>();
+            for( Iterator<Operation> it = t.getOps().iterator(); it.hasNext(); ) {
+                Operation op = it.next();
+                touched_entities.add(op.getParam(0).replace("<","").replace(">", ""));
+            }
+
             // performance counter
             ExecuteTransactions.run_tx++;
             long now = System.currentTimeMillis();
             // put this txID into "NOT_YET_COMMITED" list
             // this is neccessary in case a multiple-e tx is half way commited, so
             //it won't be half-way read
-            store.addCIDToPendingTXList(keyspace, txID);
+            store.addCIDToPendingTXList(keyspace, txID, touched_entities);
             ExecuteTransactions.add_pending_tx+=(System.currentTimeMillis()-now);
             
             switch( t.txType ) {
@@ -165,7 +171,7 @@ public class ExecuteTransactions
             // performance counter
             now = System.currentTimeMillis();
              // as the tx was finished, then remove it from pending list
-            store.removeCIDFromPendingTXList(keyspace, txID);
+            store.removeCIDFromPendingTXList(keyspace, txID, touched_entities);
             ExecuteTransactions.remove_pending_tx+=System.currentTimeMillis()-now;
             
             switch(r) {

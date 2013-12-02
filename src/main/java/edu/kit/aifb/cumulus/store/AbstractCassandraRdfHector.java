@@ -801,22 +801,37 @@ public abstract class AbstractCassandraRdfHector extends Store {
 	}
 
         @Override
-        public int addCIDToPendingTXList(String keyspace, String txID) {
-            return addData("<"+keyspace+"-pending-tx>", "\""+txID+"\"", "\""+txID+"\"",
+        public int addCIDToPendingTXList(String keyspace, String txID, ArrayList<String> touched_entities) {
+            int r=0;
+            for( Iterator it = touched_entities.iterator(); it.hasNext(); ) {
+                String ent = (String) it.next();
+                addData("<"+keyspace+"-" + ent + "-pending-tx>", "\""+txID+"\"", "\""+txID+"\"",
                     Listener.GRAPHS_VERSIONS_KEYSPACE, 0);
+            }
+            return r;
+            /*return addData("<"+keyspace+"-pending-tx>", "\""+txID+"\"", "\""+txID+"\"",
+                    Listener.GRAPHS_VERSIONS_KEYSPACE, 0);*/
         }
 
         @Override
-        public int removeCIDFromPendingTXList(String keyspace, String txID) {
-            return deleteData("<"+keyspace+"-pending-tx>", "\""+txID+"\"", "\""+txID+"\"",
+        public int removeCIDFromPendingTXList(String keyspace, String txID, ArrayList<String> touched_entities) {
+            int r=0;
+            for( Iterator it = touched_entities.iterator(); it.hasNext(); ) {
+                String ent = (String) it.next();
+                deleteData("<"+keyspace+"-" + ent + "-pending-tx>", "\""+txID+"\"", "\""+txID+"\"",
                     Listener.GRAPHS_VERSIONS_KEYSPACE, 0);
+            }
+            return r;
+            /*return deleteData("<"+keyspace+"-pending-tx>", "\""+txID+"\"", "\""+txID+"\"",
+                    Listener.GRAPHS_VERSIONS_KEYSPACE, 0);*/
         }
 
         @Override
         public HashSet<String> getCIDPendingTXSet(String keyspace) {
             HashSet<String> results = new HashSet<String>();
             Node[] query = new Node[3];
-            String e = "<"+keyspace+ "-pending-tx>";
+            String ent = query[0].toString();
+            String e = "<"+keyspace+ "-" + ent + "-pending-tx>";
             try {
                     query[0] = getNode(e, "s");
                     query[1] = getNode(null, "p");
