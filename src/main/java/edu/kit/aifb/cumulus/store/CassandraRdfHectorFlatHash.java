@@ -45,6 +45,18 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
 	
 	private final Logger _log = Logger.getLogger(this.getClass().getName());
 	
+        // performance counters
+        public static Long last_commit_id=0L;
+        public static Integer no_last_commit_id=0;
+        public static Long fetch_most_recent_v=0L;
+        public static Integer no_fetch_most_recent_v=0;
+        public static Long process_versions=0L;
+        public static Integer no_process_versions=0;
+        public static Long mutation_version=0L;
+        public static Integer no_mutation_version=0;
+        public static Long commit_abort=0L;
+        public static Integer no_commit_abort=0;
+
 	public CassandraRdfHectorFlatHash(String hosts) {
 		super(hosts);
 		_hosts = hosts;
@@ -135,8 +147,13 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                 else {
                     /*last_ver = lastVersioningNumber(keyspace, version_key.replaceAll("<", "").
                         replaceAll(">", ""), URN_author);*/
+
+                    // performance counter
+                    CassandraRdfHectorFlatHash.no_last_commit_id++;
+                    long now = System.currentTimeMillis();
                     last_ver = lastCommitTxID(keyspace, version_key.replaceAll("<", "").
                             replace(">",""));
+                    CassandraRdfHectorFlatHash.last_commit_id+=(System.currentTimeMillis()-now);
                     // if last commit ID is greater than current Tx commit id, then abort
                     //as other Tx may have in the meantime
                     if( last_ver.compareToIgnoreCase(txID) > 0 )
@@ -338,14 +355,23 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                String URN_author, String txID) {
             Hashtable<String, List<Node[]>> versioned_entities = new Hashtable<String, List<Node[]>>();
             Hashtable<String, String> previous_commit_id  = new Hashtable<String, String>();
+
+            // performance counter
+            CassandraRdfHectorFlatHash.no_fetch_most_recent_v++;
+            long now = System.currentTimeMillis();
             boolean successful_fetch = fetchMostRecentVersions(keyspace, cf, li, txID,
                     URN_author, versioned_entities, previous_commit_id);
+            CassandraRdfHectorFlatHash.fetch_most_recent_v+=(System.currentTimeMillis()-now);
+
             if( ! successful_fetch ) {
                 // it means that for one entity there is already a lastCID > txID
                 // we have to abort here the insertion
                 return 2;
             }
 
+            // performance counters
+            CassandraRdfHectorFlatHash.no_process_versions++;
+            now = System.currentTimeMillis();
             // now update the properties into the recent version fetched
             for( Iterator<Node[]> it=li.iterator(); it.hasNext(); ) {
                 Node[] current = it.next();
@@ -376,7 +402,11 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                     versioned_entities.put("<"+current[0].toString()+"-VER>",entity_version);
                 }
             }
+            CassandraRdfHectorFlatHash.process_versions+=(System.currentTimeMillis()-now);
 
+            // performance counters
+            CassandraRdfHectorFlatHash.no_mutation_version++;
+            now = System.currentTimeMillis();
             //SPO
             // insert 's-VER' and 's-URN' new versions
             Mutator<String> m = HFactory.createMutator(getExistingKeyspace(keyspace), _ss);
@@ -431,9 +461,16 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                 }
                 m.execute();
             }
+            CassandraRdfHectorFlatHash.mutation_version+=(System.currentTimeMillis()-now);
+
+            //performance counter
+            CassandraRdfHectorFlatHash.no_commit_abort++;
+            now = System.currentTimeMillis();
             // now try to write all CID,prevCID; if check my writes is enabled, it can abort in case
             //there are conflicts
-            return commitOrAbort(keyspace, txID, URN_author, versioned_entities, previous_commit_id);
+            int r = commitOrAbort(keyspace, txID, URN_author, versioned_entities, previous_commit_id);
+            CassandraRdfHectorFlatHash.commit_abort+=(System.currentTimeMillis()-now);
+            return r;
 	}
 
         @Override
