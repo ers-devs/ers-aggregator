@@ -365,7 +365,10 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                         ver_ent[2] = value_new;
                     }
                 }
-                if( ! found ) {
+//NOTE: DO NOT APPEND THE NEW TRIPLE, THIS WILL CONSTANTLY INCREASE THE LATENCY AND SPOIL OUR RESULTS ... 
+                /*
+                if( ! found ) { */
+                if(entity_version.size() == 0) {
                     //then just add the new triple. but with the new value
                     current[2] = current[3];
                     entity_version.add(current);
