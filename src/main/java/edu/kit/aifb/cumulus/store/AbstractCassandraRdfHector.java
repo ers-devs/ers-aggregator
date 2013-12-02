@@ -578,7 +578,16 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 Node[] query = new Node[3];
                 Iterator it;
                 String e = "<"+keyspaceName+ "-" + entity_w_brackets+">";
+
+                // performance counter
+                CassandraRdfHectorFlatHash.no_get_pending_tx++;
+                long now = System.currentTimeMillis();
                 HashSet<String> pending_txs = getCIDPendingTXSet(keyspaceName);
+                CassandraRdfHectorFlatHash.get_pending_tx+=(System.currentTimeMillis()-now);
+
+                // performance counter
+                CassandraRdfHectorFlatHash.no_query_all_prev_cid++;
+                now = System.currentTimeMillis();
 		try {
 			query[0] = getNode(e, "s");
 			query[1] = getNode(null, "p");
@@ -591,6 +600,11 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 try {
                     it = this.query(query, Integer.MAX_VALUE,
                             Listener.GRAPHS_VERSIONS_KEYSPACE);
+                    CassandraRdfHectorFlatHash.query_all_prev_cid+=(System.currentTimeMillis()-now);
+
+                    // performance counter
+                    CassandraRdfHectorFlatHash.no_process_all_prev_cid++;
+                    now = System.currentTimeMillis();
 
                     if (it.hasNext()) {
                         Hashtable<String, List<String>> version_history = new Hashtable<String, List<String>>();
@@ -636,13 +650,17 @@ public abstract class AbstractCassandraRdfHector extends Store {
                             else
                                 current = children.get(0);
                         }
+                        CassandraRdfHectorFlatHash.process_all_prev_cid+=(System.currentTimeMillis()-now);
                         return current;
                     }
-                    else 
+                    else {
+                        CassandraRdfHectorFlatHash.process_all_prev_cid+=(System.currentTimeMillis()-now);
                         return "-";
+                    }
                 } catch (StoreException ex) {
                     Logger.getLogger(AbstractCassandraRdfHector.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                CassandraRdfHectorFlatHash.process_all_prev_cid+=(System.currentTimeMillis()-now);
                 return "-";
         }
 

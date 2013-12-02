@@ -44,7 +44,12 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
                 sb.append((ExecuteTransactions.update_data_versioning+0.0)/ExecuteTransactions.run_tx).append("\n");
 
                 sb.append("Update \n");
-                sb.append("Get last commit ID, Fetch most recent version, Process versions, Mutations, Commit or abort \n");
+                sb.append("1.Get pending tx CID, 2.Query all prev CID, 3. Process all prev CIDs,");
+                sb.append("4.Get last commit ID (1+2+3+.), 5.Fetch most recent version (1+2+3+4+.), ");
+                sb.append("Process versions, Mutations, Commit or abort \n");
+                sb.append((CassandraRdfHectorFlatHash.get_pending_tx+0.0)/CassandraRdfHectorFlatHash.no_get_pending_tx).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.query_all_prev_cid+0.0)/CassandraRdfHectorFlatHash.no_query_all_prev_cid).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.process_all_prev_cid+0.0)/CassandraRdfHectorFlatHash.no_process_all_prev_cid).append(", ");
                 sb.append((CassandraRdfHectorFlatHash.last_commit_id+0.0)/CassandraRdfHectorFlatHash.no_last_commit_id).append(", ");
                 sb.append((CassandraRdfHectorFlatHash.fetch_most_recent_v+0.0)/CassandraRdfHectorFlatHash.no_fetch_most_recent_v).append(", ");
                 sb.append((CassandraRdfHectorFlatHash.process_versions+0.0)/CassandraRdfHectorFlatHash.no_process_versions).append(", ");
@@ -60,6 +65,12 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
                     ExecuteTransactions.update_data_versioning = 0L;
                     ExecuteTransactions.run_tx=0;
 
+                    CassandraRdfHectorFlatHash.get_pending_tx=0L;
+                    CassandraRdfHectorFlatHash.no_get_pending_tx=0;
+                    CassandraRdfHectorFlatHash.query_all_prev_cid=0L;
+                    CassandraRdfHectorFlatHash.no_query_all_prev_cid=0;
+                    CassandraRdfHectorFlatHash.process_all_prev_cid=0L;
+                    CassandraRdfHectorFlatHash.no_process_all_prev_cid=0;
                     CassandraRdfHectorFlatHash.last_commit_id=0L;
                     CassandraRdfHectorFlatHash.no_last_commit_id=0;
                     CassandraRdfHectorFlatHash.fetch_most_recent_v=0L;

@@ -56,6 +56,12 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
         public static Integer no_mutation_version=0;
         public static Long commit_abort=0L;
         public static Integer no_commit_abort=0;
+        public static Long get_pending_tx=0L;
+        public static Integer no_get_pending_tx=0;
+        public static Long query_all_prev_cid=0L;
+        public static Integer no_query_all_prev_cid=0;
+        public static Long process_all_prev_cid=0L;
+        public static Integer no_process_all_prev_cid=0;
 
 	public CassandraRdfHectorFlatHash(String hosts) {
 		super(hosts);
