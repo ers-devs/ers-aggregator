@@ -19,8 +19,8 @@ import edu.kit.aifb.cumulus.webapp.formatter.SerializationFormat;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
-/** 
- * 
+/**
+ *
  * @author tmacicas
  */
 @SuppressWarnings("serial")
@@ -53,22 +53,22 @@ public class GraphServlet extends AbstractHttpServlet {
 		}
 		Store crdf = (Store)ctx.getAttribute(Listener.STORE);
 
-		// get all existing graphs here 
+		// get all existing graphs here
 		List<String> keyspaces = ((AbstractCassandraRdfHector)crdf).getAllKeyspaces();
 		PrintWriter out = resp.getWriter();
 		resp.setContentType(formatter.getContentType());
-		if( keyspaces.size() == 0 )  
+		if( keyspaces.size() == 0 )
 			out.print("There are none existing graphs");
-		else { 
+		else {
 			out.println("All already created graphs listed below:");
-			for(Iterator<String> it = keyspaces.iterator(); it.hasNext(); ) { 
+			for(Iterator<String> it = keyspaces.iterator(); it.hasNext(); ) {
 				out.println(it.next());
 			}
 		}
 		out.close();
 		_log.info("[dataset] GET all graphs (keyspaces) " + (System.currentTimeMillis() - start) + "ms ");
 	}
-	
+
 	// use POST for creating + updates if it already exists
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -92,25 +92,25 @@ public class GraphServlet extends AbstractHttpServlet {
 		// escape if the accept header is html
 		String resource = "<resource>";
 		if ( formatter.getContentType().equals("text/html") )
-			resource = escapeHtml(resource); 
+			resource = escapeHtml(resource);
 
 		String a_id = req.getParameter("g_id"); //graph id as entity
 		String a_p = req.getParameter("g_p");	//property
 		String a_v = req.getParameter("g_v");	//value
                 String ver = req.getParameter("ver");	//value
 		// some checks
-		if( a_id == null || a_p == null || a_v == null ) { 
+		if( a_id == null || a_p == null || a_v == null ) {
 			sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST, "Please pass data like 'a_id=_&a_p=_&a_v=_'");
 			return;
 		}
-		if( a_id.isEmpty() || a_p.isEmpty() || a_v.isEmpty() ) { 
+		if( a_id.isEmpty() || a_p.isEmpty() || a_v.isEmpty() ) {
 			sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST, "Please pass non empty data 'a_id=_&a_p=_&a_v=_'");
 			return;
 		}
 		if( !a_id.startsWith("<") || !a_id.endsWith(">") ) {
 			sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST, "Please pass a resource (e.g. "+resource+") as entity / graph id");
 			return;
-		}	
+		}
 		if( (!a_p.startsWith("<") || !a_p.endsWith(">")) && (!a_p.startsWith("\"") || !a_p.endsWith("\"")) ) {
 			sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST, "Please pass either a resource (e.g."+resource+") or a literal (e.g. \"literal\") as property");
 			return;
@@ -129,24 +129,24 @@ public class GraphServlet extends AbstractHttpServlet {
 			graph = escapeHtml(a_id);
 
 		Store crdf = (Store)ctx.getAttribute(Listener.STORE);
-		// create the associated keyspace with this graph, if it does not exist  
+		// create the associated keyspace with this graph, if it does not exist
 		int r = crdf.createKeyspace(a_id, enable_versioning);
 
 		String msg = "";
-		if( r == 2 ) 
+		if( r == 2 )
 			sendError(ctx, req, resp, HttpServletResponse.SC_FORBIDDEN, "Graph " + graph + " cannot be created. Do not use 'system' as prefix.");
                 else {
-			// now insert the triple into Graphs keyspace 
+			// now insert the triple into Graphs keyspace
 			int r2 = crdf.addData("\""+Store.encodeKeyspace(a_id)+"\"", a_p, a_v, Listener.GRAPHS_NAMES_KEYSPACE, 0);
-			if( r2 != -1 ) { 
-				if (r == 1) 
+			if( r2 != -1 ) {
+				if (r == 1)
 					sendResponse(ctx, req, resp, HttpServletResponse.SC_OK, "Graph " + graph + " already exists. New data has been added.");
-				else if (r == 0) 
+				else if (r == 0)
 					sendResponse(ctx, req, resp, HttpServletResponse.SC_CREATED, "Graph " + graph + " has been created. Data added.");
-				else if(r == 3) 	
+				else if(r == 3)
 					sendError(ctx, req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "ERS exception on creating a keyspace!");
 			}
-			else 
+			else
 				sendError(ctx, req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error on adding the triple!");
 		}
 		PrintWriter out = resp.getWriter();
@@ -154,7 +154,7 @@ public class GraphServlet extends AbstractHttpServlet {
 		out.print(msg);
 		_log.info("[dataset] POST create/edit graph  " + a_id + " " + (System.currentTimeMillis() - start) + "ms ");
 	}
-	
+
 	public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		long start = System.currentTimeMillis();
 		ServletContext ctx = getServletContext();
@@ -176,12 +176,12 @@ public class GraphServlet extends AbstractHttpServlet {
 		// escape if the accept header is html
 		String resource = "<resource>";
 		if ( formatter.getContentType().equals("text/html") )
-			resource = escapeHtml(resource); 
+			resource = escapeHtml(resource);
 
                 String truncate = req.getParameter("truncate");
 		String a_id = req.getParameter("g");
 		String f = req.getParameter("f");
-		if( a_id == null || a_id.isEmpty() ) { 
+		if( a_id == null || a_id.isEmpty() ) {
 			sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST, "Please pass the graph id as 'g' parameter.");
 			return;
 		}
@@ -191,7 +191,7 @@ public class GraphServlet extends AbstractHttpServlet {
 		}
 		// escape if the accept header is not text/plain
 		String graph = a_id;
-		if ( ! formatter.getContentType().equals("text/plain") ) 
+		if ( ! formatter.getContentType().equals("text/plain") )
 			graph = escapeHtml(a_id);
 
 		boolean force = (f != null && f.equals("y")) ? true : false;
@@ -199,17 +199,31 @@ public class GraphServlet extends AbstractHttpServlet {
 		resp.setContentType(formatter.getContentType());
 		Store crdf = (Store)ctx.getAttribute(Listener.STORE);
 
-		// do the deletion of entities associated with this graph  
+		// do the deletion of entities associated with this graph
 		String encoded_keyspace = Store.encodeKeyspace(a_id);
                 if( a_id.replace("<","").replace(">","").equals(Listener.GRAPHS_VERSIONS_KEYSPACE) )
                     encoded_keyspace = a_id.replace("<","").replace(">","");
                 int r;
-                if( truncate != null )
-                    r = crdf.truncateKeyspace(encoded_keyspace);
-                else
-                    r = crdf.dropKeyspace(encoded_keyspace, force);
+                if( a_id.equals(Listener.GRAPHS_VERSIONS_KEYSPACE )) {
+                    // due to tombstones, it is better to delete and create this graph even if truncate is requested
+                    r = crdf.dropKeyspace(encoded_keyspace, true);
+                    // give a bit of time, otherwise you may get some errors
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(GraphServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    crdf.createKeyspaceInit(Listener.GRAPHS_VERSIONS_KEYSPACE);
+                    r = 0;
+                }
+                else {
+                    if( truncate != null )
+                        r = crdf.truncateKeyspace(encoded_keyspace);
+                    else
+                        r = crdf.dropKeyspace(encoded_keyspace, force);
+                }
 
-		switch(r) { 
+		switch(r) {
 			case 0:
                                 int r2 = -1;
                                 if( truncate == null ) {
@@ -218,24 +232,24 @@ public class GraphServlet extends AbstractHttpServlet {
                                 }
 				sendResponse(ctx, req, resp, HttpServletResponse.SC_OK, "The entire of graph " + graph + " has been deleted/truncated. DEBUG: " + r2);
 				break;
-			case 1: 	
+			case 1:
 				sendResponse(ctx, req, resp, HttpServletResponse.SC_OK, "The graph " + graph + " does not exist. Nothing to delete/truncate.");
 				break;
-			case 2: 
+			case 2:
 				sendError(ctx, req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Deleting the graph has raised exceptions. Check Tomcat log.");
 				break;
-			case 3:	
+			case 3:
 				// since we are using the hashed graph name, this does not happen
 				sendError(ctx, req, resp, HttpServletResponse.SC_FORBIDDEN, "Cannot delete/truncate any graph (keyspace) whose name has the prefix 'system'.");
 				break;
 			case 4:
 				sendError(ctx, req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Cannot delete/truncate a not-empty graph.");
 				break;
-			default:	
+			default:
 				// ideally, this may never happen :)
 				sendError(ctx, req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UNKNOWN exit code of deleting/truncating the graph method.");
 				break;
-		}	
+		}
 		_log.info("[dataset] DELETE/TRUNCATE keyspace("+graph+") " + (System.currentTimeMillis() - start) + "ms ");
 	}
 
