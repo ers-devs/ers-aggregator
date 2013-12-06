@@ -117,6 +117,16 @@ public class ExecuteTransactions
                 Operation op = it.next();
                 touched_entities.add(op.getParam(0).replace("<","").replace(">", ""));
             }
+            // for insert link, update link, shallow copy, deep copy -> add the 'dest' entity 
+            if( t.txType == Transaction.TX_TYPES.IL ||
+                t.txType == Transaction.TX_TYPES.DL ||
+                t.txType == Transaction.TX_TYPES.SC ||
+                t.txType == Transaction.TX_TYPES.DC) {
+                for( Iterator<Operation> it = t.getOps().iterator(); it.hasNext(); ) {
+                    Operation op = it.next();
+                    touched_entities.add(op.getParam(2).replace("<","").replace(">", ""));
+                }
+            }
 
             // performance counter
             ExecuteTransactions.run_tx++;
