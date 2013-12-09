@@ -226,7 +226,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
 		config.setMaxWaitTimeWhenExhausted(-1);
 
 		// DO NOT DISCOVER NEW HOSTS, just use the one from the config !!! 
-		config.setAutoDiscoverHosts(true);
+		config.setAutoDiscoverHosts(false);
 		
 		// RoundRobin, LeastActive and Dynamic as possible values
 		//config.setLoadBalancingPolicy(new RoundRobinBalancingPolicy());
