@@ -122,8 +122,8 @@ public abstract class Store {
                 Integer linkFlag);
 
         // add a pending transaction ID to a list; this will be skipped upon reading
-        public abstract int addCIDToPendingTXList(String keyspace, String txID, ArrayList<String> touched_entities);
-        public abstract int removeCIDFromPendingTXList(String keyspace, String txID, ArrayList<String> touched_entities);
+        public abstract int addCIDToPendingTXList(String keyspace, String txID, HashSet<String> touched_entities);
+        public abstract int removeCIDFromPendingTXList(String keyspace, String txID, HashSet<String> touched_entities);
         public abstract HashSet<String> getCIDPendingTXSet(String keyspace, String entity_w_brackets);
 
         public abstract int addDataVersioning(String e, String p, String v, String keyspace,

@@ -805,7 +805,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
 	}
 
         @Override
-        public int addCIDToPendingTXList(String keyspace, String txID, ArrayList<String> touched_entities) {
+        public int addCIDToPendingTXList(String keyspace, String txID, HashSet<String> touched_entities) {
             int r=0;
             for( Iterator it = touched_entities.iterator(); it.hasNext(); ) {
                 String ent = (String) it.next();
@@ -818,7 +818,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
         }
 
         @Override
-        public int removeCIDFromPendingTXList(String keyspace, String txID, ArrayList<String> touched_entities) {
+        public int removeCIDFromPendingTXList(String keyspace, String txID, HashSet<String> touched_entities) {
             int r=0;
             for( Iterator it = touched_entities.iterator(); it.hasNext(); ) {
                 String ent = (String) it.next();

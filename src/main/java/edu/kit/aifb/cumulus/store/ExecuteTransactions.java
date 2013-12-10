@@ -3,10 +3,12 @@ package edu.kit.aifb.cumulus.store;
 import org.semanticweb.yars.nx.Node;
 import edu.kit.aifb.cumulus.webapp.Listener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
@@ -112,7 +114,7 @@ public class ExecuteTransactions
             // get transaction ID from Snowflake here
             String txID = Listener.SNOWFLAKE_GENERATOR.getStringId();
 
-            ArrayList<String> touched_entities = new ArrayList<String>();
+            HashSet<String> touched_entities = new HashSet<String>();
             for( Iterator<Operation> it = t.getOps().iterator(); it.hasNext(); ) {
                 Operation op = it.next();
                 touched_entities.add(op.getParam(0).replace("<","").replace(">", ""));
