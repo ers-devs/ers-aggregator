@@ -8,8 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.semanticweb.yars.nx.parser.NxParser;
@@ -17,11 +18,11 @@ import org.semanticweb.yars.nx.parser.NxParser;
 public class ExecuteTransactions 
 {
         // performance counters
-        public static Integer run_tx=0;
-        public static Long add_pending_tx=0L;
-        public static Long remove_pending_tx=0L;
-        public static Long add_data_versioning=0L;
-        public static Long update_data_versioning=0L;
+        public static AtomicInteger run_tx= new AtomicInteger(0);
+        public static AtomicLong add_pending_tx= new AtomicLong(0L);
+        public static AtomicLong remove_pending_tx= new AtomicLong(0L);
+        public static AtomicLong add_data_versioning= new AtomicLong(0L);
+        public static AtomicLong update_data_versioning= new AtomicLong(0L);
 
 
 	private final Logger _log = Logger.getLogger(this.getClass().getName());
@@ -131,13 +132,13 @@ public class ExecuteTransactions
             }
 
             // performance counter
-            ExecuteTransactions.run_tx++;
+            ExecuteTransactions.run_tx.incrementAndGet();
             long now = System.currentTimeMillis();
             // put this txID into "NOT_YET_COMMITED" list
             // this is neccessary in case a multiple-e tx is half way commited, so
             //it won't be half-way read
             store.addCIDToPendingTXList(keyspace, txID, touched_entities);
-            ExecuteTransactions.add_pending_tx+=(System.currentTimeMillis()-now);
+            ExecuteTransactions.add_pending_tx.addAndGet(System.currentTimeMillis()-now);
             
             switch( t.txType ) {
                 // insert property
@@ -146,7 +147,7 @@ public class ExecuteTransactions
                     now = System.currentTimeMillis();
                     r = store.addDataVersioning(batch.iterator(), keyspace,
                             0, URN_author, txID);
-                    ExecuteTransactions.add_data_versioning+=(System.currentTimeMillis()-now);
+                    ExecuteTransactions.add_data_versioning.addAndGet(System.currentTimeMillis()-now);
                     break;
                 // update property
                 case UP:
@@ -154,7 +155,7 @@ public class ExecuteTransactions
                     now = System.currentTimeMillis();
                     r = store.updateDataVersioning(batch.iterator(), keyspace,
                             0, URN_author, txID);
-                    ExecuteTransactions.update_data_versioning+=(System.currentTimeMillis()-now);
+                    ExecuteTransactions.update_data_versioning.addAndGet(System.currentTimeMillis()-now);
                     break;
                 // delete property
                 case DP:
@@ -184,7 +185,7 @@ public class ExecuteTransactions
             now = System.currentTimeMillis();
              // as the tx was finished, then remove it from pending list
             store.removeCIDFromPendingTXList(keyspace, txID, touched_entities);
-            ExecuteTransactions.remove_pending_tx+=System.currentTimeMillis()-now;
+            ExecuteTransactions.remove_pending_tx.addAndGet(System.currentTimeMillis()-now);
             
             switch(r) {
                 case -3:

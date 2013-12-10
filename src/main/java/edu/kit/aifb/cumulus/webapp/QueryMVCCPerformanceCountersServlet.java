@@ -38,10 +38,10 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
 
                 StringBuffer sb = new StringBuffer();
                 sb.append("Add to 'not-yet-c', Remove from 'not-yet-c', Insert, Update \n");
-                sb.append((ExecuteTransactions.add_pending_tx+0.0)/ExecuteTransactions.run_tx).append(", ");
-                sb.append((ExecuteTransactions.remove_pending_tx+0.0)/ExecuteTransactions.run_tx).append(", ");
-                sb.append((ExecuteTransactions.add_data_versioning+0.0)/ExecuteTransactions.run_tx).append(", ");
-                sb.append((ExecuteTransactions.update_data_versioning+0.0)/ExecuteTransactions.run_tx).append("\n");
+                sb.append((ExecuteTransactions.add_pending_tx.get()+0.0)/ExecuteTransactions.run_tx.get()).append(", ");
+                sb.append((ExecuteTransactions.remove_pending_tx.get()+0.0)/ExecuteTransactions.run_tx.get()).append(", ");
+                sb.append((ExecuteTransactions.add_data_versioning.get()+0.0)/ExecuteTransactions.run_tx.get()).append(", ");
+                sb.append((ExecuteTransactions.update_data_versioning.get()+0.0)/ExecuteTransactions.run_tx.get()).append("\n");
 
                 sb.append("Update \n");
                 sb.append("1.Get pending tx CID, 2.Query all prev CID, 3. Process all prev CIDs,");
@@ -59,11 +59,11 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
                 // now reset the counters if reset is given
                 String r = req.getParameter("reset");
                 if( r != null ) {
-                    ExecuteTransactions.add_pending_tx = 0L;
-                    ExecuteTransactions.remove_pending_tx = 0L;
-                    ExecuteTransactions.add_data_versioning = 0L;
-                    ExecuteTransactions.update_data_versioning = 0L;
-                    ExecuteTransactions.run_tx=0;
+                    ExecuteTransactions.add_pending_tx.set(0L);
+                    ExecuteTransactions.remove_pending_tx.set(0L);
+                    ExecuteTransactions.add_data_versioning.set(0L);
+                    ExecuteTransactions.update_data_versioning.set(0L);
+                    ExecuteTransactions.run_tx.set(0);
 
                     CassandraRdfHectorFlatHash.get_pending_tx=0L;
                     CassandraRdfHectorFlatHash.no_get_pending_tx=0;
