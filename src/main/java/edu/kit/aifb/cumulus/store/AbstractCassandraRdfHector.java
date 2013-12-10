@@ -584,13 +584,13 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 String e = "<"+keyspaceName+ "-" + entity_w_brackets+">";
 
                 // performance counter
-                CassandraRdfHectorFlatHash.no_get_pending_tx++;
+                CassandraRdfHectorFlatHash.no_get_pending_tx.incrementAndGet();
                 long now = System.currentTimeMillis();
                 HashSet<String> pending_txs = getCIDPendingTXSet(keyspaceName, entity_w_brackets);
-                CassandraRdfHectorFlatHash.get_pending_tx+=(System.currentTimeMillis()-now);
+                CassandraRdfHectorFlatHash.get_pending_tx.addAndGet(System.currentTimeMillis()-now);
 
                 // performance counter
-                CassandraRdfHectorFlatHash.no_query_all_prev_cid++;
+                CassandraRdfHectorFlatHash.no_query_all_prev_cid.incrementAndGet();
                 now = System.currentTimeMillis();
 		try {
 			query[0] = getNode(e, "s");
@@ -604,10 +604,10 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 try {
                     it = this.query(query, Integer.MAX_VALUE,
                             Listener.GRAPHS_VERSIONS_KEYSPACE);
-                    CassandraRdfHectorFlatHash.query_all_prev_cid+=(System.currentTimeMillis()-now);
+                    CassandraRdfHectorFlatHash.query_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
 
                     // performance counter
-                    CassandraRdfHectorFlatHash.no_process_all_prev_cid++;
+                    CassandraRdfHectorFlatHash.no_process_all_prev_cid.incrementAndGet();
                     now = System.currentTimeMillis();
 
                     if (it.hasNext()) {
@@ -654,17 +654,17 @@ public abstract class AbstractCassandraRdfHector extends Store {
                             else
                                 current = children.get(0);
                         }
-                        CassandraRdfHectorFlatHash.process_all_prev_cid+=(System.currentTimeMillis()-now);
+                        CassandraRdfHectorFlatHash.process_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
                         return current;
                     }
                     else {
-                        CassandraRdfHectorFlatHash.process_all_prev_cid+=(System.currentTimeMillis()-now);
+                        CassandraRdfHectorFlatHash.process_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
                         return "-";
                     }
                 } catch (StoreException ex) {
                     Logger.getLogger(AbstractCassandraRdfHector.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                CassandraRdfHectorFlatHash.process_all_prev_cid+=(System.currentTimeMillis()-now);
+                CassandraRdfHectorFlatHash.process_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
                 return "-";
         }
 
