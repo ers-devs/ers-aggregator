@@ -56,32 +56,6 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
                 sb.append((CassandraRdfHectorFlatHash.mutation_version.get()+0.0)/CassandraRdfHectorFlatHash.no_mutation_version.get()).append(", ");
                 sb.append((CassandraRdfHectorFlatHash.commit_abort.get()+0.0)/CassandraRdfHectorFlatHash.no_commit_abort.get()).append("\n");
 
-                // now reset the counters if reset is given
-                String r = req.getParameter("reset");
-                if( r != null ) {
-                    ExecuteTransactions.add_pending_tx.set(0L);
-                    ExecuteTransactions.remove_pending_tx.set(0L);
-                    ExecuteTransactions.add_data_versioning.set(0L);
-                    ExecuteTransactions.update_data_versioning.set(0L);
-                    ExecuteTransactions.run_tx.set(0);
-
-                    CassandraRdfHectorFlatHash.get_pending_tx.set(0L);
-                    CassandraRdfHectorFlatHash.no_get_pending_tx.set(0);
-                    CassandraRdfHectorFlatHash.query_all_prev_cid.set(0L);
-                    CassandraRdfHectorFlatHash.no_query_all_prev_cid.set(0);
-                    CassandraRdfHectorFlatHash.process_all_prev_cid.set(0L);
-                    CassandraRdfHectorFlatHash.no_process_all_prev_cid.set(0);
-                    CassandraRdfHectorFlatHash.last_commit_id.set(0L);
-                    CassandraRdfHectorFlatHash.no_last_commit_id.set(0);
-                    CassandraRdfHectorFlatHash.fetch_most_recent_v.set(0L);
-                    CassandraRdfHectorFlatHash.no_fetch_most_recent_v.set(0);
-                    CassandraRdfHectorFlatHash.process_versions.set(0L);
-                    CassandraRdfHectorFlatHash.no_process_versions.set(0);
-                    CassandraRdfHectorFlatHash.mutation_version.set(0L);
-                    CassandraRdfHectorFlatHash.no_mutation_version.set(0);
-                    CassandraRdfHectorFlatHash.commit_abort.set(0L);
-                    CassandraRdfHectorFlatHash.no_commit_abort.set(0);
-                }
                 resp.getWriter().println(sb.toString());
                 resp.getWriter().println();
 
@@ -106,8 +80,32 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
                 sb.append((CassandraRdfHectorFlatHash.mutation_version_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_mutation_version.get()).append(", ");
                 sb.append((CassandraRdfHectorFlatHash.commit_abort_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_commit_abort.get()).append("\n");
 
-                // now reset the counters if reset is given
+                 // now reset the counters if reset is given
+                String r = req.getParameter("reset");
                 if( r != null ) {
+                    ExecuteTransactions.add_pending_tx.set(0L);
+                    ExecuteTransactions.remove_pending_tx.set(0L);
+                    ExecuteTransactions.add_data_versioning.set(0L);
+                    ExecuteTransactions.update_data_versioning.set(0L);
+                    ExecuteTransactions.run_tx.set(0);
+
+                    CassandraRdfHectorFlatHash.get_pending_tx.set(0L);
+                    CassandraRdfHectorFlatHash.no_get_pending_tx.set(0);
+                    CassandraRdfHectorFlatHash.query_all_prev_cid.set(0L);
+                    CassandraRdfHectorFlatHash.no_query_all_prev_cid.set(0);
+                    CassandraRdfHectorFlatHash.process_all_prev_cid.set(0L);
+                    CassandraRdfHectorFlatHash.no_process_all_prev_cid.set(0);
+                    CassandraRdfHectorFlatHash.last_commit_id.set(0L);
+                    CassandraRdfHectorFlatHash.no_last_commit_id.set(0);
+                    CassandraRdfHectorFlatHash.fetch_most_recent_v.set(0L);
+                    CassandraRdfHectorFlatHash.no_fetch_most_recent_v.set(0);
+                    CassandraRdfHectorFlatHash.process_versions.set(0L);
+                    CassandraRdfHectorFlatHash.no_process_versions.set(0);
+                    CassandraRdfHectorFlatHash.mutation_version.set(0L);
+                    CassandraRdfHectorFlatHash.no_mutation_version.set(0);
+                    CassandraRdfHectorFlatHash.commit_abort.set(0L);
+                    CassandraRdfHectorFlatHash.no_commit_abort.set(0);
+                
                     ExecuteTransactions.add_pending_tx_cpu_time.set(0L);
                     ExecuteTransactions.remove_pending_tx_cpu_time.set(0L);
                     ExecuteTransactions.add_data_versioning_cpu_time.set(0L);
