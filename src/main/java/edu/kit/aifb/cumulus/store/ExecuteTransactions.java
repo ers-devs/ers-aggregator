@@ -144,7 +144,7 @@ public class ExecuteTransactions
             store.addCIDToPendingTXList(keyspace, txID, touched_entities);
             //ExecuteTransactions.add_pending_tx.addAndGet(System.currentTimeMillis()-now);
 
-            long cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time;
+            long cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
             ExecuteTransactions.add_pending_tx.addAndGet(cpu_time);
             
             switch( t.txType ) {
