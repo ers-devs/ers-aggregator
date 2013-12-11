@@ -3,7 +3,6 @@ package edu.kit.aifb.cumulus.store;
 import org.semanticweb.yars.nx.Node;
 import edu.kit.aifb.cumulus.webapp.Listener;
 import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;

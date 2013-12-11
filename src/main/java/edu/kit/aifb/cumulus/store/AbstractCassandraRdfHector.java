@@ -596,6 +596,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 // performance counter
                 CassandraRdfHectorFlatHash.no_query_all_prev_cid.incrementAndGet();
                 now = System.currentTimeMillis();
+                now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
 		try {
 			query[0] = getNode(e, "s");
 			query[1] = getNode(null, "p");
@@ -609,6 +610,8 @@ public abstract class AbstractCassandraRdfHector extends Store {
                     it = this.query(query, Integer.MAX_VALUE,
                             Listener.GRAPHS_VERSIONS_KEYSPACE);
                     CassandraRdfHectorFlatHash.query_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
+                    cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                    CassandraRdfHectorFlatHash.query_all_prev_cid_cpu_time.addAndGet(cpu_time);
 
                     // performance counter
                     CassandraRdfHectorFlatHash.no_process_all_prev_cid.incrementAndGet();
