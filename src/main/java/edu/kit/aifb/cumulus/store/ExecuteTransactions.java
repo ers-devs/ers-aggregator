@@ -2,6 +2,8 @@ package edu.kit.aifb.cumulus.store;
 
 import org.semanticweb.yars.nx.Node;
 import edu.kit.aifb.cumulus.webapp.Listener;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,6 +133,8 @@ public class ExecuteTransactions
                 }
             }
 
+            long now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
+
             // performance counter
             ExecuteTransactions.run_tx.incrementAndGet();
             long now = System.currentTimeMillis();
@@ -138,7 +142,10 @@ public class ExecuteTransactions
             // this is neccessary in case a multiple-e tx is half way commited, so
             //it won't be half-way read
             store.addCIDToPendingTXList(keyspace, txID, touched_entities);
-            ExecuteTransactions.add_pending_tx.addAndGet(System.currentTimeMillis()-now);
+            //ExecuteTransactions.add_pending_tx.addAndGet(System.currentTimeMillis()-now);
+
+            long cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time;
+            ExecuteTransactions.add_pending_tx.addAndGet(cpu_time);
             
             switch( t.txType ) {
                 // insert property
