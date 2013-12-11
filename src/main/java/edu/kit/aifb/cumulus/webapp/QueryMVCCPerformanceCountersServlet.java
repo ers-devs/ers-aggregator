@@ -82,8 +82,48 @@ public class QueryMVCCPerformanceCountersServlet extends AbstractHttpServlet {
                     CassandraRdfHectorFlatHash.commit_abort.set(0L);
                     CassandraRdfHectorFlatHash.no_commit_abort.set(0);
                 }
-
                 resp.getWriter().println(sb.toString());
+                resp.getWriter().println();
+
+
+                sb = new StringBuffer();
+                sb.append("Add to 'not-yet-c' cpu time, Remove from 'not-yet-c'cpu time, Insert cpu time, Update cpu time \n");
+                sb.append((ExecuteTransactions.add_pending_tx_cpu_time.get()+0.0)/ExecuteTransactions.run_tx.get()).append(", ");
+                sb.append((ExecuteTransactions.remove_pending_tx_cpu_time.get()+0.0)/ExecuteTransactions.run_tx.get()).append(", ");
+                sb.append((ExecuteTransactions.add_data_versioning_cpu_time.get()+0.0)/ExecuteTransactions.run_tx.get()).append(", ");
+                sb.append((ExecuteTransactions.update_data_versioning_cpu_time.get()+0.0)/ExecuteTransactions.run_tx.get()).append("\n");
+
+                sb.append("Update CPU TIME \n");
+                sb.append("1.Get pending tx CID, 2.Query all prev CID, 3. Process all prev CIDs,");
+                sb.append("4.Get last commit ID (1+2+3+.), 5.Fetch most recent version (1+2+3+4+.), ");
+                sb.append("Process versions, Mutations, Commit or abort \n");
+                sb.append((CassandraRdfHectorFlatHash.get_pending_tx_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_get_pending_tx.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.query_all_prev_cid_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_query_all_prev_cid.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.process_all_prev_cid_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_process_all_prev_cid.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.last_commit_id_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_last_commit_id.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.fetch_most_recent_v_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_fetch_most_recent_v.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.process_versions_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_process_versions.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.mutation_version_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_mutation_version.get()).append(", ");
+                sb.append((CassandraRdfHectorFlatHash.commit_abort_cpu_time.get()+0.0)/CassandraRdfHectorFlatHash.no_commit_abort.get()).append("\n");
+
+                // now reset the counters if reset is given
+                if( r != null ) {
+                    ExecuteTransactions.add_pending_tx_cpu_time.set(0L);
+                    ExecuteTransactions.remove_pending_tx_cpu_time.set(0L);
+                    ExecuteTransactions.add_data_versioning_cpu_time.set(0L);
+                    ExecuteTransactions.update_data_versioning_cpu_time.set(0L);
+
+                    CassandraRdfHectorFlatHash.get_pending_tx_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.query_all_prev_cid_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.process_all_prev_cid_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.last_commit_id_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.fetch_most_recent_v_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.process_versions_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.mutation_version_cpu_time.set(0L);
+                    CassandraRdfHectorFlatHash.commit_abort_cpu_time.set(0L);
+                }
+                resp.getWriter().println(sb.toString());
+
 		_log.info("[dataset] QUERY versions performance counters " +
                         (System.currentTimeMillis() - start));
 	}

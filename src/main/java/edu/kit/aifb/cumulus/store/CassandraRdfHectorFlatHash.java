@@ -34,6 +34,7 @@ import org.semanticweb.yars.nx.parser.NxParser;
 import org.semanticweb.yars.nx.parser.ParseException;
 
 import edu.kit.aifb.cumulus.webapp.Listener;
+import java.lang.management.ManagementFactory;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -49,20 +50,35 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
 	
         // performance counters
         public static AtomicLong last_commit_id= new AtomicLong(0L);
+        public static AtomicLong last_commit_id_cpu_time= new AtomicLong(0L);
         public static AtomicInteger no_last_commit_id= new AtomicInteger(0);
+        
         public static AtomicLong fetch_most_recent_v= new AtomicLong(0L);
+        public static AtomicLong fetch_most_recent_v_cpu_time= new AtomicLong(0L);
         public static AtomicInteger no_fetch_most_recent_v=new AtomicInteger(0);
+        
         public static AtomicLong process_versions = new AtomicLong(0L);
+        public static AtomicLong process_versions_cpu_time = new AtomicLong(0L);
         public static AtomicInteger no_process_versions=new AtomicInteger(0);
+        
         public static AtomicLong mutation_version=new AtomicLong(0L);
+        public static AtomicLong mutation_version_cpu_time=new AtomicLong(0L);
         public static AtomicInteger no_mutation_version=new AtomicInteger(0);
+        
         public static AtomicLong commit_abort=new AtomicLong(0L);
+        public static AtomicLong commit_abort_cpu_time=new AtomicLong(0L);
         public static AtomicInteger no_commit_abort=new AtomicInteger(0);
+        
         public static AtomicLong get_pending_tx=new AtomicLong(0L);
+        public static AtomicLong get_pending_tx_cpu_time=new AtomicLong(0L);
         public static AtomicInteger no_get_pending_tx=new AtomicInteger(0);
+        
         public static AtomicLong query_all_prev_cid=new AtomicLong(0L);
+        public static AtomicLong query_all_prev_cid_cpu_time=new AtomicLong(0L);
         public static AtomicInteger no_query_all_prev_cid=new AtomicInteger(0);
+        
         public static AtomicLong process_all_prev_cid=new AtomicLong(0L);
+        public static AtomicLong process_all_prev_cid_cpu_time=new AtomicLong(0L);
         public static AtomicInteger no_process_all_prev_cid=new AtomicInteger(0);
 
 	public CassandraRdfHectorFlatHash(String hosts) {
@@ -159,9 +175,12 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                     // performance counter
                     CassandraRdfHectorFlatHash.no_last_commit_id.incrementAndGet();
                     long now = System.currentTimeMillis();
+                    long now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
                     last_ver = lastCommitTxID(keyspace, version_key.replaceAll("<", "").
                             replace(">",""));
                     CassandraRdfHectorFlatHash.last_commit_id.addAndGet(System.currentTimeMillis()-now);
+                    long cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                    CassandraRdfHectorFlatHash.last_commit_id_cpu_time.addAndGet(cpu_time);
                     // if last commit ID is greater than current Tx commit id, then abort
                     //as other Tx may have in the meantime
                     if( last_ver.compareToIgnoreCase(txID) > 0 )
@@ -367,9 +386,12 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
             // performance counter
             CassandraRdfHectorFlatHash.no_fetch_most_recent_v.incrementAndGet();
             long now = System.currentTimeMillis();
+            long now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
             boolean successful_fetch = fetchMostRecentVersions(keyspace, cf, li, txID,
                     URN_author, versioned_entities, previous_commit_id);
             CassandraRdfHectorFlatHash.fetch_most_recent_v.addAndGet(System.currentTimeMillis()-now);
+            long cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+            CassandraRdfHectorFlatHash.fetch_most_recent_v_cpu_time.addAndGet(cpu_time);
 
             if( ! successful_fetch ) {
                 // it means that for one entity there is already a lastCID > txID
@@ -380,6 +402,7 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
             // performance counters
             CassandraRdfHectorFlatHash.no_process_versions.incrementAndGet();
             now = System.currentTimeMillis();
+            now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
             // now update the properties into the recent version fetched
             for( Iterator<Node[]> it=li.iterator(); it.hasNext(); ) {
                 Node[] current = it.next();
@@ -411,10 +434,13 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                 }
             }
             CassandraRdfHectorFlatHash.process_versions.addAndGet(System.currentTimeMillis()-now);
+            cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+            CassandraRdfHectorFlatHash.process_versions_cpu_time.addAndGet(cpu_time);
 
             // performance counters
             CassandraRdfHectorFlatHash.no_mutation_version.incrementAndGet();
             now = System.currentTimeMillis();
+            now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
             //SPO
             // insert 's-VER' and 's-URN' new versions
             Mutator<String> m = HFactory.createMutator(getExistingKeyspace(keyspace), _ss);
@@ -470,14 +496,19 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                 m.execute();
             }
             CassandraRdfHectorFlatHash.mutation_version.addAndGet(System.currentTimeMillis()-now);
+            cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+            CassandraRdfHectorFlatHash.mutation_version_cpu_time.addAndGet(cpu_time);
 
             //performance counter
             CassandraRdfHectorFlatHash.no_commit_abort.incrementAndGet();
             now = System.currentTimeMillis();
+            now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
             // now try to write all CID,prevCID; if check my writes is enabled, it can abort in case
             //there are conflicts
             int r = commitOrAbort(keyspace, txID, URN_author, versioned_entities, previous_commit_id);
             CassandraRdfHectorFlatHash.commit_abort.addAndGet(System.currentTimeMillis()-now);
+            cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+            CassandraRdfHectorFlatHash.commit_abort_cpu_time.addAndGet(cpu_time);
             return r;
 	}
 

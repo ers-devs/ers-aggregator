@@ -47,6 +47,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.management.ManagementFactory;
 import java.net.URLDecoder;
 import java.util.Hashtable;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
@@ -586,8 +587,11 @@ public abstract class AbstractCassandraRdfHector extends Store {
                 // performance counter
                 CassandraRdfHectorFlatHash.no_get_pending_tx.incrementAndGet();
                 long now = System.currentTimeMillis();
+                long now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
                 HashSet<String> pending_txs = getCIDPendingTXSet(keyspaceName, entity_w_brackets);
                 CassandraRdfHectorFlatHash.get_pending_tx.addAndGet(System.currentTimeMillis()-now);
+                long cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                CassandraRdfHectorFlatHash.get_pending_tx_cpu_time.addAndGet(cpu_time);
 
                 // performance counter
                 CassandraRdfHectorFlatHash.no_query_all_prev_cid.incrementAndGet();
@@ -609,6 +613,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
                     // performance counter
                     CassandraRdfHectorFlatHash.no_process_all_prev_cid.incrementAndGet();
                     now = System.currentTimeMillis();
+                    now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
 
                     if (it.hasNext()) {
                         Hashtable<String, List<String>> version_history = new Hashtable<String, List<String>>();
@@ -655,16 +660,22 @@ public abstract class AbstractCassandraRdfHector extends Store {
                                 current = children.get(0);
                         }
                         CassandraRdfHectorFlatHash.process_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
+                        cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                        CassandraRdfHectorFlatHash.process_all_prev_cid_cpu_time.addAndGet(cpu_time);
                         return current;
                     }
                     else {
                         CassandraRdfHectorFlatHash.process_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
+                        cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                        CassandraRdfHectorFlatHash.process_all_prev_cid_cpu_time.addAndGet(cpu_time);
                         return "-";
                     }
                 } catch (StoreException ex) {
                     Logger.getLogger(AbstractCassandraRdfHector.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 CassandraRdfHectorFlatHash.process_all_prev_cid.addAndGet(System.currentTimeMillis()-now);
+                cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                CassandraRdfHectorFlatHash.process_all_prev_cid_cpu_time.addAndGet(cpu_time);
                 return "-";
         }
 

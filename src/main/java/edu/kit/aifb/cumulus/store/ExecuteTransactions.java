@@ -22,9 +22,13 @@ public class ExecuteTransactions
         // performance counters
         public static AtomicInteger run_tx= new AtomicInteger(0);
         public static AtomicLong add_pending_tx= new AtomicLong(0L);
+        public static AtomicLong add_pending_tx_cpu_time= new AtomicLong(0L);
         public static AtomicLong remove_pending_tx= new AtomicLong(0L);
+        public static AtomicLong remove_pending_tx_cpu_time= new AtomicLong(0L);
         public static AtomicLong add_data_versioning= new AtomicLong(0L);
+        public static AtomicLong add_data_versioning_cpu_time= new AtomicLong(0L);
         public static AtomicLong update_data_versioning= new AtomicLong(0L);
+        public static AtomicLong update_data_versioning_cpu_time= new AtomicLong(0L);
 
 
 	private final Logger _log = Logger.getLogger(this.getClass().getName());
@@ -133,36 +137,40 @@ public class ExecuteTransactions
                 }
             }
 
-            long now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
-
             // performance counter
             ExecuteTransactions.run_tx.incrementAndGet();
             long now = System.currentTimeMillis();
+            long now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
             // put this txID into "NOT_YET_COMMITED" list
             // this is neccessary in case a multiple-e tx is half way commited, so
             //it won't be half-way read
             store.addCIDToPendingTXList(keyspace, txID, touched_entities);
-            //ExecuteTransactions.add_pending_tx.addAndGet(System.currentTimeMillis()-now);
-
+            ExecuteTransactions.add_pending_tx.addAndGet(System.currentTimeMillis()-now);
             long cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
-            ExecuteTransactions.add_pending_tx.addAndGet(cpu_time);
+            ExecuteTransactions.add_pending_tx_cpu_time.addAndGet(cpu_time);
             
             switch( t.txType ) {
                 // insert property
                 case IP:
                     // performance counter
                     now = System.currentTimeMillis();
+                    now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
                     r = store.addDataVersioning(batch.iterator(), keyspace,
                             0, URN_author, txID);
                     ExecuteTransactions.add_data_versioning.addAndGet(System.currentTimeMillis()-now);
+                    cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                    ExecuteTransactions.add_data_versioning_cpu_time.addAndGet(cpu_time);
                     break;
                 // update property
                 case UP:
                     // performance counter
                     now = System.currentTimeMillis();
+                    now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
                     r = store.updateDataVersioning(batch.iterator(), keyspace,
                             0, URN_author, txID);
                     ExecuteTransactions.update_data_versioning.addAndGet(System.currentTimeMillis()-now);
+                    cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+                    ExecuteTransactions.update_data_versioning_cpu_time.addAndGet(cpu_time);
                     break;
                 // delete property
                 case DP:
@@ -190,9 +198,12 @@ public class ExecuteTransactions
 
             // performance counter
             now = System.currentTimeMillis();
+            now_cpu_time = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
              // as the tx was finished, then remove it from pending list
             store.removeCIDFromPendingTXList(keyspace, txID, touched_entities);
             ExecuteTransactions.remove_pending_tx.addAndGet(System.currentTimeMillis()-now);
+            cpu_time = (ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId()) - now_cpu_time) / 100000;
+            ExecuteTransactions.remove_pending_tx_cpu_time.addAndGet(cpu_time);
             
             switch(r) {
                 case -3:
