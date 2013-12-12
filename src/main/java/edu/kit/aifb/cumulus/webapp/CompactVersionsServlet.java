@@ -108,7 +108,7 @@ public class CompactVersionsServlet extends AbstractHttpServlet {
 // NOTE: URN IS HARDCODED
 
                     boolean successful_fetch = ((CassandraRdfHectorFlatHash)crdf).fetchMostRecentVersions(
-                            encoded_graph, CassandraRdfHectorFlatHash.CF_S_PO, l, lastCID, "'tx_client'",
+                            encoded_graph, CassandraRdfHectorFlatHash.CF_S_PO, l, lastCID, "tx_client",
                             versioned_entities, previous_commit_id);
                     if( ! successful_fetch ) {
                             sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST,
@@ -132,11 +132,11 @@ public class CompactVersionsServlet extends AbstractHttpServlet {
 
                     // now delete all the versions
                     ((CassandraRdfHectorFlatHash)crdf).batchDeleteVersioning(CassandraRdfHectorFlatHash.CF_S_PO,
-                            versioned_entities.get(exact_key), encoded_graph, "'tx_client'", lastCID);
+                            versioned_entities.get(exact_key), encoded_graph, "tx_client", lastCID);
 
                     try {
                         // now add the previously retrieved most recent entity version
-                        crdf.addDataVersioning(versioned_entities.get(exact_key).iterator(), encoded_graph, 0, "'tx_client'", lastCID);
+                        crdf.addDataVersioning(versioned_entities.get(exact_key).iterator(), encoded_graph, 0, "tx_client", lastCID);
                     } catch (StoreException ex) {
                          _log.severe(ex.getMessage());
                           sendError(ctx, req, resp, HttpServletResponse.SC_BAD_REQUEST, "Could not add the most recent version back!");
