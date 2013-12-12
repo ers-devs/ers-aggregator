@@ -14,7 +14,6 @@ import org.semanticweb.yars.nx.parser.ParseException;
 
 import edu.kit.aifb.cumulus.webapp.Listener;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import me.prettyprint.hector.api.beans.HColumn;

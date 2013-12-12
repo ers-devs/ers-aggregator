@@ -147,7 +147,7 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
 	}
 
         // for all involved entities, get the most recent version and also the lastCommitID
-        private boolean fetchMostRecentVersions(String keyspace, String cf, List<Node[]> li,
+        public boolean fetchMostRecentVersions(String keyspace, String cf, List<Node[]> li,
                 String txID, String URN_author,
                 Hashtable<String, List<Node[]>> versioned_entities, Hashtable<String, String> previous_commit_id ) {
             // FETCH ALL MOST RECENT VERSIONS FOR ALL ENTITIES and add the new triple
@@ -376,6 +376,22 @@ public class CassandraRdfHectorFlatHash extends CassandraRdfHectorQuads {
                 m.execute();
                 return 0;
 	}
+
+        public int batchDeleteVersioning(String cf, List<Node[]> li, String keyspace,
+                String URN_author, String txID) {
+                Mutator<String> m = HFactory.createMutator(getExistingKeyspace(keyspace), _ss);
+                for( Iterator<Node[]> it = li.iterator(); it.hasNext(); ) {
+                    Node[] nx = (Node[]) it.next();
+                    // reorder for the key
+                    Node[] reordered = Util.reorder(nx, _maps.get(cf));
+                    String rowKey = new Resource(reordered[0].toString()).toN3();
+                    if( !reordered[0].toString().contains("-VER") )
+                        rowKey = new Resource(reordered[0].toString() + "-VER").toN3();
+                    m.addDeletion(rowKey, cf);
+                }
+                m.execute();
+                return 0;
+        }
 
         @Override
 	public int batchUpdateVersioning(String cf, List<Node[]> li, String keyspace,

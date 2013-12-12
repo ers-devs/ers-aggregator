@@ -203,6 +203,10 @@
 	<servlet-name>query_mvcc</servlet-name>
 	<servlet-class>edu.kit.aifb.cumulus.webapp.QueryMVCCPerformanceCountersServlet</servlet-class>
   </servlet>
+  <servlet>
+	<servlet-name>compact</servlet-name>
+	<servlet-class>edu.kit.aifb.cumulus.webapp.CompactVersionsServlet</servlet-class>
+  </servlet>
 
   <servlet>
   	<servlet-name>query</servlet-name>
@@ -269,6 +273,10 @@
   <servlet-mapping>
     <servlet-name>query_mvcc</servlet-name>
     <url-pattern>/query_mvcc</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>compact</servlet-name>
+    <url-pattern>/compact</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>query_bridges</servlet-name>

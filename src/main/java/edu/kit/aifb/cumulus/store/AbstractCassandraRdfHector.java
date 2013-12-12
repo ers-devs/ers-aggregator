@@ -1096,7 +1096,7 @@ public abstract class AbstractCassandraRdfHector extends Store {
 			return -2; 
 		}
 		Iterator<Node[]> it = getRowIterator(e, keyspace);		
-            _log.info("DELETE| keyspace: " + keyspace + " e: " + e);
+                _log.info("DELETE| keyspace: " + keyspace + " e: " + e);
 		for( ; it.hasNext(); ) {
 			Node[] n = (Node[])it.next();
 			this.deleteData(n, keyspace, linkFlag);
